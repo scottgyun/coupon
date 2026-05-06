@@ -39,14 +39,21 @@
 
             <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-            </a-scene>
+        </a-scene>
     </div>
 
-<script>
+    <script>
         const sceneEl = document.querySelector('#main-scene');
         const ui = document.querySelector('#ui');
-        // 주의: 주소 끝에 / 를 붙이지 마세요.
-        const TARGET_URL = "https://sites.google.com/view/tchinmokho"; 
+
+        // [핵심] 나열해주신 순서대로 매칭된 보안 코드 50개
+        const SECRET_CODES = [
+            "K9F7", "W6P1", "H8J4", "P5B2", "C4A1", "D2Y7", "G8M5", "X9P2", "R1C4", "T5H9",
+            "H3N8", "M1V9", "C9A2", "R4T1", "E4N8", "V3Q9", "N2K7", "S8P9", "U1R8", "V1K4",
+            "D4S7", "Z9V7", "W2D1", "E1R9", "K4J3", "Z7W4", "B8S5", "M7C3", "G6T5", "L9C1",
+            "Q5X2", "T6N3", "L2J7", "F3W8", "P2A5", "Q8X4", "G4T2", "Y2S5", "Y3X2", "Z5D9",
+            "F1R8", "X7S4", "J3W4", "A4E9", "N5T1", "E6N5", "B8K3", "J7C6", "F6B7", "P8D1"
+        ];
 
         for (let i = 0; i < 50; i++) {
             const entity = document.createElement('a-entity');
@@ -61,14 +68,16 @@
             entity.appendChild(image);
             
             entity.addEventListener("targetFound", () => {
-                const couponNum = i + 1;
-                ui.innerText = `🎉 ${couponNum}번 쿠폰 발견! 🎉`;
+                // i번째 타겟 인덱스에 맞는 보안 코드를 가져옵니다.
+                const couponCode = SECRET_CODES[i];
+                
+                ui.innerText = `🎉 쿠폰 발견! 🎉`;
                 ui.classList.add("found");
                 
-               setTimeout(() => {
-        // 같은 깃허브 폴더 안의 result.html로 이동 (가장 확실함)
-        window.location.href = `result.html?num=${couponNum}`;
-    }, 1500);
+                setTimeout(() => {
+                    // 보안 코드를 가지고 result.html로 이동합니다.
+                    window.location.href = `result.html?num=${couponCode}`;
+                }, 1500);
             });
 
             sceneEl.appendChild(entity);

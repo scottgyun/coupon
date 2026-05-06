@@ -3,41 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>AR Coupon Fix</title>
+    <title>AR Direct Click</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
     
     <style>
         body { margin: 0; overflow: hidden; }
-        
-        /* [중요] 실제 터치를 담당할 투명한 버튼 레이어 */
-        #click-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            display: none; /* 평소엔 숨김 */
-            z-index: 999; 
-            cursor: pointer;
-        }
-        
         #ui-layer {
             position: fixed; top: 20px; left: 0; right: 0;
             display: flex; justify-content: center; z-index: 100;
             pointer-events: none;
         }
         .guide-text {
-            color: white; background: rgba(255, 0, 0, 0.8); /* 눈에 띄게 빨간색 */
-            padding: 15px 30px; border-radius: 50px;
-            font-family: sans-serif; font-size: 18px; font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            color: white; background: rgba(0, 0, 0, 0.6);
+            padding: 10px 20px; border-radius: 20px;
+            font-family: sans-serif; font-size: 14px;
         }
     </style>
 </head>
 <body>
 
-    <div id="click-overlay"></div>
-
     <div id="ui-layer">
-        <div id="guide" class="guide-text">이미지를 비춰주세요</div>
-        <div id="click-me" class="guide-text" style="display:none;">✨ 화면 아무데나 터치하세요! ✨</div>
+        <div id="status-text" class="guide-text">카메라로 대상을 비춰주세요</div>
     </div>
 
     <a-scene 
@@ -52,38 +39,40 @@
             <img id="couponImg" src="./coupon.png">
         </a-assets>
 
-        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+        <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse;" raycaster="objects: .clickable"></a-camera>
 
-        <a-entity mindar-image-target="targetIndex: 0">
-            <a-image src="#couponImg" position="0 0 0" height="0.6" width="1"></a-image>
+        <a-entity id="target" mindar-image-target="targetIndex: 0">
+            <a-image 
+                id="coupon-entity" 
+                src="#couponImg" 
+                class="clickable"
+                position="0 0 0" 
+                height="0.7" 
+                width="1">
+            </a-image>
         </a-entity>
     </a-scene>
 
     <script>
-        const guide = document.querySelector('#guide');
-        const clickMe = document.querySelector('#click-me');
-        const clickOverlay = document.querySelector('#click-overlay');
-        const sceneEl = document.querySelector('a-scene');
+        const statusText = document.querySelector('#status-text');
+        const couponEntity = document.querySelector('#coupon-entity');
+        const target = document.querySelector('#target');
 
         const TARGET_URL = "https://sites.google.com/view/tchinmokho"; 
 
-        // 1. 타겟 발견 시: 투명 버튼 레이어를 화면 전체에 깔아버림
-        sceneEl.addEventListener("targetFound", () => {
-            guide.style.display = "none";
-            clickMe.style.display = "block";
-            clickOverlay.style.display = "block"; // 터치 레이어 활성화
+        // 타겟 발견 시 문구 변경
+        target.addEventListener("targetFound", () => {
+            statusText.innerText = "쿠폰이 나타났습니다! 쿠폰을 터치하세요.";
         });
 
-        // 2. 타겟 분실 시: 다시 숨김
-        sceneEl.addEventListener("targetLost", () => {
-            guide.style.display = "block";
-            clickMe.style.display = "none";
-            clickOverlay.style.display = "none"; // 터치 레이어 비활성화
+        target.addEventListener("targetLost", () => {
+            statusText.innerText = "카메라로 대상을 비춰주세요";
         });
 
-        // 3. 투명 버튼 레이어 클릭 시 무조건 이동
-        clickOverlay.addEventListener("click", () => {
-            // 모바일에서 가장 확실한 이동 방식
+        // [핵심] 투명 레이어가 아니라, AR 이미지 객체에 직접 이벤트를 겁니다.
+        couponEntity.addEventListener("click", (evt) => {
+            console.log("쿠폰 클릭됨!");
+            // 모바일 팝업 차단을 방지하기 위해 현재 창에서 이동
             window.location.href = TARGET_URL;
         });
     </script>

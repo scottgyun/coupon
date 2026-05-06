@@ -71,7 +71,7 @@
             setTimeout(() => {
         // 주소 연결 시 ?num= 이 정확히 붙도록 수정
         const separator = TARGET_URL.includes('?') ? '&' : '?';
-        const finalUrl = TARGET_URL + separator + "num=" + couponNum;
+        const finalUrl = TARGET_URL + separator + "#num=" + couponNum;
         
         console.log("이동할 주소:", finalUrl); // 디버깅용
         window.location.href = finalUrl;

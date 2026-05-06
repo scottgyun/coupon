@@ -3,71 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>AR Final</title>
+    <title>Indoor AR Hidden Coupon</title>
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.0/dist/mindar-image-aframe.prod.js"></script>
-    
     <style>
         body { margin: 0; overflow: hidden; }
-        #status-ui {
-            position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
-            z-index: 999; color: white; background: rgba(0,0,0,0.6);
-            padding: 10px 20px; border-radius: 20px; font-family: sans-serif;
-            pointer-events: none; width: 80%; text-align: center;
+        #ui {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: white; background: rgba(0,0,0,0.8);
+            padding: 20px; border-radius: 15px; text-align: center;
+            font-family: sans-serif; z-index: 100; pointer-events: none;
         }
     </style>
 </head>
 <body>
 
-    <div id="status-ui">카메라로 이미지를 비춰주세요</div>
+    <div id="ui">
+        탐색 중...<br>
+        숨겨진 대상을 카메라로 비춰보세요!
+    </div>
 
     <a-scene 
         mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiScanning: no;" 
-        embedded 
-        vr-mode-ui="enabled: false" 
-        device-orientation-permission-ui="enabled: false"
-        color-space="sRGB" 
-        renderer="colorManagement: true, physicallyCorrectLights">
+        embedded vr-mode-ui="enabled: false" 
+        device-orientation-permission-ui="enabled: false">
+        
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <a-assets>
-            <img id="couponImg" src="./coupon.png">
-        </a-assets>
-
-        <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse;" raycaster="objects: .clickable"></a-camera>
-
-        <a-entity id="target" mindar-image-target="targetIndex: 0">
-            <a-image 
-                id="coupon-btn"
-                src="#couponImg" 
-                class="clickable"
-                position="0 0 -1" 
-                height="0.6" 
-                width="0.9">
-            </a-image>
-        </a-entity>
+        <a-entity id="hidden-target" mindar-image-target="targetIndex: 0"></a-entity>
     </a-scene>
 
     <script>
-        const statusUi = document.querySelector('#status-ui');
-        const targetEl = document.querySelector('#target');
-        const couponBtn = document.querySelector('#coupon-btn');
+        const targetEl = document.querySelector('#hidden-target');
+        const ui = document.querySelector('#ui');
         const TARGET_URL = "https://sites.google.com/view/tchinmokho";
 
-        // 인식 성공 시
+        // [핵심] 대상을 인식하는 순간 바로 실행
         targetEl.addEventListener("targetFound", () => {
-            statusUi.innerText = "쿠폰을 터치하면 이동합니다!";
-            statusUi.style.background = "rgba(0, 100, 255, 0.8)";
-        });
-
-        // 인식 실패 시
-        targetEl.addEventListener("targetLost", () => {
-            statusUi.innerText = "카메라로 이미지를 비춰주세요";
-            statusUi.style.background = "rgba(0,0,0,0.6)";
-        });
-
-        // 클릭(터치) 이벤트 - 가장 확실한 window.location 사용
-        couponBtn.addEventListener("click", () => {
-            window.location.href = TARGET_URL;
+            ui.innerHTML = "🎉 쿠폰 발견! 이동합니다... 🎉";
+            ui.style.background = "rgba(0, 150, 0, 0.9)";
+            
+            // 0.5초 뒤에 자동으로 사이트 이동
+            setTimeout(() => {
+                window.location.href = TARGET_URL;
+            }, 500);
         });
     </script>
 </body>

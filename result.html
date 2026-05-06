@@ -10,11 +10,22 @@
         h1 { color: #007bff; font-size: 22px; }
         #prize { font-size: 28px; font-weight: bold; color: #e63946; margin: 20px 0; min-height: 40px; }
         .input-group { margin-top: 20px; padding-top: 20px; border-top: 1px dashed #ccc; }
-        /* input type을 text로 바꿔야 영문+숫자 조합이 보입니다 */
         input { padding: 10px; width: 60%; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; text-transform: uppercase; }
-        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        
+        /* 버튼 공통 스타일 */
+        button { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        .btn-check { background: #007bff; color: white; }
+        /* 다시 스캔하기 버튼 스타일 */
+        .btn-retry { 
+            margin-top: 30px; 
+            width: 100%; 
+            background: #6c757d; 
+            color: white; 
+            border-radius: 30px;
+            padding: 15px;
+        }
+
         #msg { color: #666; margin-bottom: 10px; }
-        /* placeholder(힌트) 색상 조절 */
         input::placeholder { color: #bbb; }
     </style>
 </head>
@@ -30,8 +41,12 @@
         <div class="input-group">
             <p style="font-size: 13px; color: #999;">번호가 인식되지 않나요?</p>
             <input type="text" id="manual-num" placeholder="직접 번호를 입력하세요.">
-            <button onclick="checkManual()">확인</button>
+            <button class="btn-check" onclick="checkManual()">확인</button>
         </div>
+
+        <button class="btn-retry" onclick="location.href='index.html'">
+            📸 다른 카드 스캔하기
+        </button>
     </div>
 
     <script>
@@ -66,28 +81,22 @@
             document.getElementById('sub-msg').style.display = 'none';
 
             const script = document.createElement('script');
-            // 보안 코드가 대문자이므로 전송 시 대문자로 변환
             script.src = `${SCRIPT_URL}?num=${n.toUpperCase()}&callback=handleResponse`;
             document.body.appendChild(script);
         }
 
-        // 1. 페이지 로드 시 주소창 번호 확인 및 힌트 세팅
         const params = new URLSearchParams(window.location.search);
         const autoNum = params.get('num');
         
         if (autoNum) {
-            // [핵심] 주소창에서 받은 번호를 입력창에 회색(placeholder)으로 넣음
             inputEl.placeholder = autoNum;
             fetchPrize(autoNum);
         } else {
             document.getElementById('msg').innerText = "쿠폰을 스캔해주세요.";
         }
 
-        // 2. 수동 입력 확인 버튼 클릭 시
         function checkManual() {
-            // 직접 입력한 값이 있으면 그걸 쓰고, 없으면 힌트(placeholder) 값을 사용
             const inputNum = inputEl.value.trim() || (inputEl.placeholder !== "직접 번호를 입력하세요." ? inputEl.placeholder : "");
-            
             if (inputNum) {
                 fetchPrize(inputNum);
             } else {
@@ -95,8 +104,5 @@
             }
         }
     </script>
-    <button onclick="location.href='index.html'" style="margin-top:20px; padding:10px 20px; border-radius:20px; border:none; background:#007bff; color:white; font-weight:bold;">
-    다른 카드 스캔하기
-</button>
 </body>
 </html>

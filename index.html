@@ -33,10 +33,6 @@
             device-orientation-permission-ui="enabled: false"
             color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights">
             
-            <a-assets>
-                <img id="couponImg" src="./coupon.png">
-            </a-assets>
-
             <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
         </a-scene>
@@ -46,21 +42,23 @@
         const sceneEl = document.querySelector('#main-scene');
         const ui = document.querySelector('#ui');
 
-        // [핵심] 나열해주신 순서대로 매칭된 보안 코드 50개
+        // 보안 코드 30개
         const SECRET_CODES = [
             "K9F7", "W6P1", "H8J4", "P5B2", "C4A1", "D2Y7", "G8M5", "X9P2", "R1C4", "T5H9",
             "H3N8", "M1V9", "C9A2", "R4T1", "E4N8", "V3Q9", "N2K7", "S8P9", "U1R8", "V1K4",
-            "D4S7", "Z9V7", "W2D1", "E1R9", "K4J3", "Z7W4", "B8S5", "M7C3", "G6T5", "L9C1",
-            "Q5X2", "T6N3", "L2J7", "F3W8", "P2A5", "Q8X4", "G4T2", "Y2S5", "Y3X2", "Z5D9",
-            "F1R8", "X7S4", "J3W4", "A4E9", "N5T1", "E6N5", "B8K3", "J7C6", "F6B7", "P8D1"
+            "D4S7", "Z9V7", "W2D1", "E1R9", "K4J3", "Z7W4", "B8S5", "M7C3", "G6T5", "L9C1"
         ];
 
-        for (let i = 0; i < 50; i++) {
+        // 30개의 마커 생성 및 이미지 폴더 경로 설정
+        for (let i = 0; i < 30; i++) {
             const entity = document.createElement('a-entity');
             entity.setAttribute('mindar-image-target', `targetIndex: ${i}`);
             
             const image = document.createElement('a-image');
-            image.setAttribute('src', '#couponImg');
+            
+            // images 폴더 안의 1.png ~ 30.png 매칭
+            image.setAttribute('src', `./images/${i + 1}.png`);
+            
             image.setAttribute('position', '0 0 0.1');
             image.setAttribute('height', '0.6');
             image.setAttribute('width', '0.9');
@@ -68,14 +66,12 @@
             entity.appendChild(image);
             
             entity.addEventListener("targetFound", () => {
-                // i번째 타겟 인덱스에 맞는 보안 코드를 가져옵니다.
                 const couponCode = SECRET_CODES[i];
                 
                 ui.innerText = `🎉 쿠폰 발견! 🎉`;
                 ui.classList.add("found");
                 
                 setTimeout(() => {
-                    // 보안 코드를 가지고 result.html로 이동합니다.
                     window.location.href = `result.html?num=${couponCode}`;
                 }, 1500);
             });

@@ -1,52 +1,93 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Indoor AR Hidden Coupon</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Indoor AR Hidden Coupon Fix</title>
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.0/dist/mindar-image-aframe.prod.js"></script>
+    
     <style>
-        body { margin: 0; overflow: hidden; }
+        /* [중요] 화면 쪼개짐 및 여백 완전 방지 CSS */
+        body { margin: 0; overflow: hidden; width: 100vw; height: 100vh; position: fixed; }
+        
+        /* 전체 화면 AR 영역 */
+        #ar-scene-container { width: 100%; height: 100%; }
+
+        /* 상태 UI */
         #ui {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            color: white; background: rgba(0,0,0,0.8);
-            padding: 20px; border-radius: 15px; text-align: center;
-            font-family: sans-serif; z-index: 100; pointer-events: none;
+            position: fixed; top: 30px; left: 50%; transform: translateX(-50%);
+            color: white; background: rgba(0,0,0,0.7);
+            padding: 12px 24px; border-radius: 30px; text-align: center;
+            font-family: sans-serif; z-index: 1000; pointer-events: none;
+            font-size: 16px; font-weight: bold; width: 80%; max-width: 300px;
+        }
+        /* 찾았을 때 UI 스타일 */
+        .found { background: rgba(0, 123, 255, 0.9) !important; animation: pulse 0.5s infinite alternate; }
+        
+        @keyframes pulse {
+            from { transform: translateX(-50%) scale(1); }
+            to { transform: translateX(-50%) scale(1.05); }
         }
     </style>
 </head>
 <body>
 
-    <div id="ui">
-        탐색 중...<br>
-        숨겨진 대상을 카메라로 비춰보세요!
+    <div id="ui">숨겨진 대상을 비춰보세요</div>
+
+    <div id="ar-scene-container">
+        <a-scene 
+            mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiScanning: no;" 
+            embedded 
+            vr-mode-ui="enabled: false" 
+            loading-screen="enabled: false"
+            device-orientation-permission-ui="enabled: false"
+            color-space="sRGB" 
+            renderer="colorManagement: true, physicallyCorrectLights">
+            
+            <a-assets>
+                <img id="couponImg" src="./coupon.png">
+            </a-assets>
+
+            <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+            <a-entity id="hidden-target" mindar-image-target="targetIndex: 0">
+                <a-image 
+                    src="#couponImg" 
+                    position="0 0 0.1" 
+                    height="0.6" 
+                    width="0.9">
+                </a-image>
+            </a-entity>
+        </a-scene>
     </div>
-
-    <a-scene 
-        mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiScanning: no;" 
-        embedded vr-mode-ui="enabled: false" 
-        device-orientation-permission-ui="enabled: false">
-        
-        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-
-        <a-entity id="hidden-target" mindar-image-target="targetIndex: 0"></a-entity>
-    </a-scene>
 
     <script>
         const targetEl = document.querySelector('#hidden-target');
         const ui = document.querySelector('#ui');
         const TARGET_URL = "https://sites.google.com/view/tchinmokho";
 
-        // [핵심] 대상을 인식하는 순간 바로 실행
+        // [핵심 로직] 대상을 발견했을 때
         targetEl.addEventListener("targetFound", () => {
-            ui.innerHTML = "🎉 쿠폰 발견! 이동합니다... 🎉";
-            ui.style.background = "rgba(0, 150, 0, 0.9)";
+            // 1. UI 문구 및 스타일 변경
+            ui.innerText = "🎉 쿠폰 발견! 잠시 후 이동합니다 🎉";
+            ui.classList.add("found");
             
-            // 0.5초 뒤에 자동으로 사이트 이동
+            // 2. 쿠폰 이미지가 나타남 (a-entity 내부의 a-image) - A-Frame이 알아서 해줌
+
+            // 3. 1.5초(1500ms) 대기 후 사이트 이동
+            // (쿠폰 이미지를 충분히 보여주기 위해 시간 설정)
             setTimeout(() => {
                 window.location.href = TARGET_URL;
-            }, 500);
+            }, 1500); 
+        });
+
+        // 대상을 놓쳤을 때 (선택 사항)
+        targetEl.addEventListener("targetLost", () => {
+            if(!ui.classList.contains("found")) { // 이미 찾았으면 문구 고정
+                ui.innerText = "숨겨진 대상을 비춰보세요";
+                ui.classList.remove("found");
+            }
         });
     </script>
 </body>

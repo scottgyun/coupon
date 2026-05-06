@@ -1,24 +1,61 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.4/dist/mindar-image-aframe.prod.js"></script>
+<html lang="ko">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8">
+    <title>Web-AR Coupon</title>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+    
     <style>
-      body { margin: 0; overflow: hidden; }
+        body { margin: 0; overflow: hidden; }
+        /* 스캐닝 안내 레이아웃 (이미지 비추는 동안 나타남) */
+        #scanning-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); display: flex;
+            align-items: center; justify-content: center; z-index: 100;
+        }
+        #scanning-overlay.hidden { display: none; }
+        .info-text { color: white; font-family: sans-serif; font-size: 1.2rem; text-align: center; }
     </style>
-  </head>
-  <body>
-    <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiLoading: no; uiError: no; uiScanning: yes;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
-      <a-assets>
-        <img id="couponImg" src="./coupon.png">
-      </a-assets>
+</head>
+<body>
+    <div id="scanning-overlay">
+        <div class="info-text">이미지를 카메라에 정면으로 비춰주세요!</div>
+    </div>
 
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+    <a-scene 
+        mindar-image="imageTargetSrc: ./targets.mind; uiScanning: #scanning-overlay;" 
+        color-space="sRGB" 
+        renderer="colorManagement: true, physicallyCorrectLights" 
+        vr-mode-ui="enabled: false" 
+        device-orientation-permission-ui="enabled: false">
+        
+        <a-assets>
+            <img id="couponImg" src="./coupon.png">
+        </a-assets>
 
-      <a-entity mindar-image-target="targetIndex: 0">
-        <a-image src="#couponImg" position="0 0 0" height="0.6" width="1"></a-image>
-      </a-entity>
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+        <a-entity mindar-image-target="targetIndex: 0">
+            <a-image src="#couponImg" position="0 0 0" height="0.6" width="1"></a-image>
+        </a-entity>
     </a-scene>
-  </body>
+
+    <script>
+        // 타겟이 인식되면 오버레이를 숨기는 간단한 로직
+        const sceneEl = document.querySelector('a-scene');
+        const overlay = document.querySelector('#scanning-overlay');
+        
+        sceneEl.addEventListener("targetFound", event => {
+            console.log("타겟 발견!");
+            overlay.classList.add("hidden");
+        });
+        
+        sceneEl.addEventListener("targetLost", event => {
+            console.log("타겟 분실!");
+            overlay.classList.remove("hidden");
+        });
+    </script>
+</body>
 </html>

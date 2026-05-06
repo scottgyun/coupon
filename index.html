@@ -69,13 +69,13 @@
                 
                 // 1.5초간 쿠폰을 보여준 뒤, 번호 파라미터를 들고 이동
             setTimeout(() => {
-        // 주소 연결 시 ?num= 이 정확히 붙도록 수정
-        const separator = TARGET_URL.includes('?') ? '&' : '?';
-        const finalUrl = TARGET_URL + separator + "#num=" + couponNum;
-        
-        console.log("이동할 주소:", finalUrl); // 디버깅용
-        window.location.href = finalUrl;
-    }, 1500);
+// 주소 끝에 /가 있든 없든 안전하게 결합합니다.
+    const cleanUrl = TARGET_URL.endsWith('/') ? TARGET_URL.slice(0, -1) : TARGET_URL;
+    const finalUrl = cleanUrl + "/#num=" + couponNum; // /#num= 형식을 사용
+    
+    console.log("최종 이동 주소:", finalUrl);
+    window.top.location.href = finalUrl; // window.top을 써서 전체 페이지를 이동
+}, 1500);
 });
 
             sceneEl.appendChild(entity);

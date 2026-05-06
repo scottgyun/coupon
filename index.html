@@ -69,12 +69,17 @@
                 
                 // 1.5초간 쿠폰을 보여준 뒤, 번호 파라미터를 들고 이동
             setTimeout(() => {
-// 주소 끝에 /가 있든 없든 안전하게 결합합니다.
-    const cleanUrl = TARGET_URL.endsWith('/') ? TARGET_URL.slice(0, -1) : TARGET_URL;
-    const finalUrl = cleanUrl + "/#num=" + couponNum; // /#num= 형식을 사용
+    // 1. 기본 주소에서 물음표(?)나 슬래시(/)가 끝에 있다면 제거
+    let baseUrl = TARGET_URL.split('?')[0]; 
+    if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
+
+    // 2. 가장 깔끔한 형태인 /#num=번호 형식으로 결합
+    const finalUrl = baseUrl + "/#num=" + couponNum;
     
-    console.log("최종 이동 주소:", finalUrl);
-    window.top.location.href = finalUrl; // window.top을 써서 전체 페이지를 이동
+    console.log("이동 주소 확인:", finalUrl);
+    
+    // 3. 이동 (부모 창까지 확실하게 이동)
+    window.top.location.href = finalUrl;
 }, 1500);
 });
 

@@ -1,31 +1,38 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta charset="UTF-8">
-    <title>Web-AR Coupon</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>AR Coupon Event</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
     
     <style>
         body { margin: 0; overflow: hidden; }
-        /* 스캐닝 안내 레이아웃 (이미지 비추는 동안 나타남) */
-        #scanning-overlay {
+        
+        /* 안내 문구 레이아웃 */
+        #ui-layer {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5); display: flex;
-            align-items: center; justify-content: center; z-index: 100;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 100; pointer-events: none; /* 클릭 방해 금지 */
         }
-        #scanning-overlay.hidden { display: none; }
-        .info-text { color: white; font-family: sans-serif; font-size: 1.2rem; text-align: center; }
+        .guide-text {
+            color: white; background: rgba(0,0,0,0.6);
+            padding: 10px 20px; border-radius: 20px;
+            font-family: sans-serif; font-size: 14px;
+        }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
-    <div id="scanning-overlay">
-        <div class="info-text">이미지를 카메라에 정면으로 비춰주세요!</div>
+
+    <div id="ui-layer">
+        <div id="guide" class="guide-text">이미지를 비춰주세요</div>
+        <div id="click-me" class="guide-text hidden">쿠폰을 터치하세요!</div>
     </div>
 
     <a-scene 
-        mindar-image="imageTargetSrc: ./targets.mind; uiScanning: #scanning-overlay;" 
+        mindar-image="imageTargetSrc: ./targets.mind; uiScanning: no;" 
         color-space="sRGB" 
         renderer="colorManagement: true, physicallyCorrectLights" 
         vr-mode-ui="enabled: false" 
@@ -35,26 +42,44 @@
             <img id="couponImg" src="./coupon.png">
         </a-assets>
 
-        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+        <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse;" raycaster="objects: .clickable"></a-camera>
 
         <a-entity mindar-image-target="targetIndex: 0">
-            <a-image src="#couponImg" position="0 0 0" height="0.6" width="1"></a-image>
+            <a-image id="couponEntity" src="#couponImg" position="0 0 0" height="0.6" width="1" class="clickable"></a-image>
         </a-entity>
     </a-scene>
 
     <script>
-        // 타겟이 인식되면 오버레이를 숨기는 간단한 로직
+        const guide = document.querySelector('#guide');
+        const clickMe = document.querySelector('#click-me');
+        const couponEntity = document.querySelector('#couponEntity');
         const sceneEl = document.querySelector('a-scene');
-        const overlay = document.querySelector('#scanning-overlay');
-        
+
+        // 쿠폰 번호 설정
+        const COUPON_NUMBER = "GIFT-2026-AR-SUCCESS"; 
+
+        // 이미지를 찾았을 때
         sceneEl.addEventListener("targetFound", event => {
-            console.log("타겟 발견!");
-            overlay.classList.add("hidden");
+            guide.classList.add("hidden");
+            clickMe.classList.remove("hidden");
         });
-        
+
+        // 이미지를 놓쳤을 때
         sceneEl.addEventListener("targetLost", event => {
-            console.log("타겟 분실!");
-            overlay.classList.remove("hidden");
+            guide.classList.remove("hidden");
+            clickMe.classList.add("hidden");
+        });
+
+        // 쿠폰 클릭 이벤트
+        couponEntity.addEventListener("click", event => {
+            // 1. 번호 복사
+            navigator.clipboard.writeText(COUPON_NUMBER).then(() => {
+                // 2. 알림 팝업
+                alert("쿠폰번호가 복사되었습니다!\n번호: " + COUPON_NUMBER);
+            }).catch(err => {
+                // 보안상 복사 실패 시 알림만이라도 띄움
+                alert("쿠폰번호: " + COUPON_NUMBER);
+            });
         });
     </script>
 </body>

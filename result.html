@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>쿠폰 결과 확인</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding-top: 50px; background: #f4f4f4; }
+        .card { background: white; margin: 0 auto; width: 80%; max-width: 400px; padding: 30px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { color: #007bff; }
+        #prize { font-size: 28px; font-weight: bold; color: #e63946; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div id="msg">데이터 조회 중...</div>
+        <div id="result" style="display:none;">
+            <h1>🎉 결과 확인 🎉</h1>
+            <div id="prize"></div>
+            <p>이 화면을 담당자에게 보여주세요.</p>
+        </div>
+    </div>
+
+    <script>
+        // 1. 주소창에서 번호 읽기 (깃허브는 이게 아주 잘 됩니다)
+        const params = new URLSearchParams(window.location.search);
+        const num = params.get('num');
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzEyV28nj1wHeTCAcOMtQrmOkoMk7SvZiMlFEmNZUC2U2x_bQjJ4q9WZnHXFFEmyDmv/exec";
+
+        window.handleResponse = function(data) {
+            document.getElementById('msg').style.display = 'none';
+            document.getElementById('result').style.display = 'block';
+            if(data.status === "success") {
+                document.getElementById('prize').innerText = data.prize;
+            } else {
+                document.getElementById('prize').innerText = "이미 사용된 쿠폰입니다.";
+            }
+        };
+
+        if (num) {
+            const script = document.createElement('script');
+            script.src = `${SCRIPT_URL}?num=${num}&callback=handleResponse`;
+            document.body.appendChild(script);
+        } else {
+            document.getElementById('msg').innerText = "쿠폰 번호가 없습니다.";
+        }
+    </script>
+</body>
+</html>

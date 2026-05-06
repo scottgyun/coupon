@@ -65,16 +65,10 @@
                 ui.innerText = `🎉 ${couponNum}번 쿠폰 발견! 🎉`;
                 ui.classList.add("found");
                 
-                setTimeout(() => {
-                    // [핵심 수정] 주소를 가장 깨끗하게 만듭니다.
-                    // 구글 사이트는 기본적으로 파라미터를 받을 때 ? 형식을 선호합니다.
-                    const finalUrl = TARGET_URL + "?num=" + couponNum;
-                    
-                    console.log("최종 이동 경로:", finalUrl);
-                    
-                    // window.location.href 보다 강력한 top 이동을 사용합니다.
-                    window.top.location.replace(finalUrl);
-                }, 1500);
+               setTimeout(() => {
+        // 같은 깃허브 폴더 안의 result.html로 이동 (가장 확실함)
+        window.location.href = `result.html?num=${couponNum}`;
+    }, 1500);
             });
 
             sceneEl.appendChild(entity);

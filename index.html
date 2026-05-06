@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>AR Direct Click</title>
+    <title>AR Floating Coupon & Click</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
     
@@ -16,8 +16,8 @@
         }
         .guide-text {
             color: white; background: rgba(0, 0, 0, 0.6);
-            padding: 10px 20px; border-radius: 20px;
-            font-family: sans-serif; font-size: 14px;
+            padding: 12px 24px; border-radius: 30px;
+            font-family: sans-serif; font-size: 16px; font-weight: bold;
         }
     </style>
 </head>
@@ -39,16 +39,16 @@
             <img id="couponImg" src="./coupon.png">
         </a-assets>
 
-        <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse;" raycaster="objects: .clickable"></a-camera>
+        <a-camera position="0 0 0" raycaster="objects: .clickable" cursor="fuse: false; rayOrigin: mouse;"></a-camera>
 
         <a-entity id="target" mindar-image-target="targetIndex: 0">
             <a-image 
                 id="coupon-entity" 
                 src="#couponImg" 
                 class="clickable"
-                position="0 0 0" 
-                height="0.7" 
-                width="1">
+                position="0 0 -1" 
+                height="0.5" 
+                width="0.5">
             </a-image>
         </a-entity>
     </a-scene>
@@ -60,19 +60,17 @@
 
         const TARGET_URL = "https://sites.google.com/view/tchinmokho"; 
 
-        // 타겟 발견 시 문구 변경
         target.addEventListener("targetFound", () => {
-            statusText.innerText = "쿠폰이 나타났습니다! 쿠폰을 터치하세요.";
+            statusText.innerText = "✨ 쿠폰을 터치하세요! ✨";
         });
 
         target.addEventListener("targetLost", () => {
             statusText.innerText = "카메라로 대상을 비춰주세요";
         });
 
-        // [핵심] 투명 레이어가 아니라, AR 이미지 객체에 직접 이벤트를 겁니다.
-        couponEntity.addEventListener("click", (evt) => {
-            console.log("쿠폰 클릭됨!");
-            // 모바일 팝업 차단을 방지하기 위해 현재 창에서 이동
+        // 쿠폰 직접 터치 이벤트
+        couponEntity.addEventListener("click", () => {
+            // 새 창 대신 현재 창 이동 (모바일에서 팝업 차단을 피하기 위해)
             window.location.href = TARGET_URL;
         });
     </script>

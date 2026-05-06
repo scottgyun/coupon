@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Multi-Coupon AR System</title>
+    <title>50-Coupon AR System</title>
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.0/dist/mindar-image-aframe.prod.js"></script>
     
@@ -23,7 +23,7 @@
 </head>
 <body>
 
-    <div id="ui">숨겨진 쿠폰을 비춰보세요</div>
+    <div id="ui">쿠폰을 찾아 카메라로 비춰보세요</div>
 
     <div id="ar-scene-container">
         <a-scene 
@@ -45,28 +45,29 @@
     <script>
         const sceneEl = document.querySelector('#main-scene');
         const ui = document.querySelector('#ui');
-        const TARGET_URL = "https://sites.google.com/view/tchinmokho"; // 구글 사이트 주소
+        const TARGET_URL = "https://sites.google.com/view/tchinmokho"; // 이동할 구글 사이트 주소
 
-        // 1. 100개의 타겟 엔티티 자동 생성 (targetIndex 0~99)
-        for (let i = 0; i < 100; i++) {
+        // 1. 50개의 타겟 엔티티 자동 생성 (Index 0 ~ 49)
+        for (let i = 0; i < 50; i++) {
             const entity = document.createElement('a-entity');
             entity.setAttribute('mindar-image-target', `targetIndex: ${i}`);
             
+            // 쿠폰 발견 시 공중에 띄울 이미지
             const image = document.createElement('a-image');
             image.setAttribute('src', '#couponImg');
-            image.setAttribute('position', '0 0 0.1');
+            image.setAttribute('position', '0 0 0.1'); // 마커 바로 앞 10cm 지점
             image.setAttribute('height', '0.6');
             image.setAttribute('width', '0.9');
             
             entity.appendChild(image);
             
-            // 타겟 발견 이벤트 리스너 등록
+            // 타겟 인식 이벤트
             entity.addEventListener("targetFound", () => {
-                const couponNum = i + 1; // 1번부터 시작하도록 설정
+                const couponNum = i + 1; // 1번부터 시작
                 ui.innerText = `🎉 ${couponNum}번 쿠폰 발견! 🎉`;
                 ui.classList.add("found");
                 
-                // 1.5초 뒤 이동 (번호를 파라미터로 전달)
+                // 1.5초간 쿠폰을 보여준 뒤, 번호 파라미터를 들고 이동
                 setTimeout(() => {
                     window.location.href = `${TARGET_URL}?num=${couponNum}`;
                 }, 1500);

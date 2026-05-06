@@ -3,34 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>AR Coupon To Site</title>
+    <title>AR Coupon Fix</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
     
     <style>
         body { margin: 0; overflow: hidden; }
+        
+        /* [중요] 실제 터치를 담당할 투명한 버튼 레이어 */
+        #click-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: none; /* 평소엔 숨김 */
+            z-index: 999; 
+            cursor: pointer;
+        }
+        
         #ui-layer {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            display: flex; align-items: center; justify-content: center;
-            z-index: 100; pointer-events: none;
+            position: fixed; top: 20px; left: 0; right: 0;
+            display: flex; justify-content: center; z-index: 100;
+            pointer-events: none;
         }
         .guide-text {
-            color: white; background: rgba(0,0,0,0.7);
-            padding: 12px 24px; border-radius: 30px;
-            font-family: sans-serif; font-size: 16px; font-weight: bold;
+            color: white; background: rgba(255, 0, 0, 0.8); /* 눈에 띄게 빨간색 */
+            padding: 15px 30px; border-radius: 50px;
+            font-family: sans-serif; font-size: 18px; font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
-        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
+    <div id="click-overlay"></div>
+
     <div id="ui-layer">
-        <div id="guide" class="guide-text">이미지를 비춰주세요!</div>
-        <div id="click-me" class="guide-text hidden">🎁 쿠폰을 터치해서 사이트 방문하기 🎁</div>
+        <div id="guide" class="guide-text">이미지를 비춰주세요</div>
+        <div id="click-me" class="guide-text" style="display:none;">✨ 화면 아무데나 터치하세요! ✨</div>
     </div>
 
     <a-scene 
         mindar-image="imageTargetSrc: ./targets.mind; uiScanning: no;" 
+        embedded
         color-space="sRGB" 
         renderer="colorManagement: true, physicallyCorrectLights" 
         vr-mode-ui="enabled: false" 
@@ -40,36 +52,39 @@
             <img id="couponImg" src="./coupon.png">
         </a-assets>
 
-        <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse;" raycaster="objects: .clickable"></a-camera>
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
         <a-entity mindar-image-target="targetIndex: 0">
-            <a-image id="couponEntity" src="#couponImg" position="0 0 0" height="0.6" width="1" class="clickable"></a-image>
+            <a-image src="#couponImg" position="0 0 0" height="0.6" width="1"></a-image>
         </a-entity>
     </a-scene>
 
     <script>
         const guide = document.querySelector('#guide');
         const clickMe = document.querySelector('#click-me');
-        const couponEntity = document.querySelector('#couponEntity');
+        const clickOverlay = document.querySelector('#click-overlay');
         const sceneEl = document.querySelector('a-scene');
 
-        // 이동할 구글 사이트 주소
         const TARGET_URL = "https://sites.google.com/view/tchinmokho"; 
 
+        // 1. 타겟 발견 시: 투명 버튼 레이어를 화면 전체에 깔아버림
         sceneEl.addEventListener("targetFound", () => {
-            guide.classList.add("hidden");
-            clickMe.classList.remove("hidden");
+            guide.style.display = "none";
+            clickMe.style.display = "block";
+            clickOverlay.style.display = "block"; // 터치 레이어 활성화
         });
 
+        // 2. 타겟 분실 시: 다시 숨김
         sceneEl.addEventListener("targetLost", () => {
-            guide.classList.remove("hidden");
-            clickMe.classList.add("hidden");
+            guide.style.display = "block";
+            clickMe.style.display = "none";
+            clickOverlay.style.display = "none"; // 터치 레이어 비활성화
         });
 
-        // 쿠폰 클릭 시 사이트 이동
-        couponEntity.addEventListener("click", () => {
-            // 새 창에서 구글 사이트 열기
-            window.open(TARGET_URL, '_blank');
+        // 3. 투명 버튼 레이어 클릭 시 무조건 이동
+        clickOverlay.addEventListener("click", () => {
+            // 모바일에서 가장 확실한 이동 방식
+            window.location.href = TARGET_URL;
         });
     </script>
 </body>

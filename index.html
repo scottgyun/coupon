@@ -68,10 +68,15 @@
                 ui.classList.add("found");
                 
                 // 1.5초간 쿠폰을 보여준 뒤, 번호 파라미터를 들고 이동
-                setTimeout(() => {
-                    window.location.href = `${TARGET_URL}?num=${couponNum}`;
-                }, 1500);
-            });
+            setTimeout(() => {
+        // 주소 연결 시 ?num= 이 정확히 붙도록 수정
+        const separator = TARGET_URL.includes('?') ? '&' : '?';
+        const finalUrl = TARGET_URL + separator + "num=" + couponNum;
+        
+        console.log("이동할 주소:", finalUrl); // 디버깅용
+        window.location.href = finalUrl;
+    }, 1500);
+});
 
             sceneEl.appendChild(entity);
         }

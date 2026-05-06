@@ -3,18 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Indoor AR Hidden Coupon Fix</title>
+    <title>Multi-Coupon AR System</title>
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.0/dist/mindar-image-aframe.prod.js"></script>
     
     <style>
-        /* [중요] 화면 쪼개짐 및 여백 완전 방지 CSS */
         body { margin: 0; overflow: hidden; width: 100vw; height: 100vh; position: fixed; }
-        
-        /* 전체 화면 AR 영역 */
         #ar-scene-container { width: 100%; height: 100%; }
-
-        /* 상태 UI */
         #ui {
             position: fixed; top: 30px; left: 50%; transform: translateX(-50%);
             color: white; background: rgba(0,0,0,0.7);
@@ -22,28 +17,21 @@
             font-family: sans-serif; z-index: 1000; pointer-events: none;
             font-size: 16px; font-weight: bold; width: 80%; max-width: 300px;
         }
-        /* 찾았을 때 UI 스타일 */
         .found { background: rgba(0, 123, 255, 0.9) !important; animation: pulse 0.5s infinite alternate; }
-        
-        @keyframes pulse {
-            from { transform: translateX(-50%) scale(1); }
-            to { transform: translateX(-50%) scale(1.05); }
-        }
+        @keyframes pulse { from { transform: translateX(-50%) scale(1); } to { transform: translateX(-50%) scale(1.05); } }
     </style>
 </head>
 <body>
 
-    <div id="ui">숨겨진 대상을 비춰보세요</div>
+    <div id="ui">숨겨진 쿠폰을 비춰보세요</div>
 
     <div id="ar-scene-container">
         <a-scene 
+            id="main-scene"
             mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiScanning: no;" 
-            embedded 
-            vr-mode-ui="enabled: false" 
-            loading-screen="enabled: false"
+            embedded vr-mode-ui="enabled: false" loading-screen="enabled: false"
             device-orientation-permission-ui="enabled: false"
-            color-space="sRGB" 
-            renderer="colorManagement: true, physicallyCorrectLights">
+            color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights">
             
             <a-assets>
                 <img id="couponImg" src="./coupon.png">
@@ -51,44 +39,41 @@
 
             <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-            <a-entity id="hidden-target" mindar-image-target="targetIndex: 0">
-                <a-image 
-                    src="#couponImg" 
-                    position="0 0 0.1" 
-                    height="0.6" 
-                    width="0.9">
-                </a-image>
-            </a-entity>
-        </a-scene>
+            </a-scene>
     </div>
 
     <script>
-        const targetEl = document.querySelector('#hidden-target');
+        const sceneEl = document.querySelector('#main-scene');
         const ui = document.querySelector('#ui');
-        const TARGET_URL = "https://sites.google.com/view/tchinmokho";
+        const TARGET_URL = "https://sites.google.com/view/tchinmokho"; // 구글 사이트 주소
 
-        // [핵심 로직] 대상을 발견했을 때
-        targetEl.addEventListener("targetFound", () => {
-            // 1. UI 문구 및 스타일 변경
-            ui.innerText = "🎉 쿠폰 발견! 잠시 후 이동합니다 🎉";
-            ui.classList.add("found");
+        // 1. 100개의 타겟 엔티티 자동 생성 (targetIndex 0~99)
+        for (let i = 0; i < 100; i++) {
+            const entity = document.createElement('a-entity');
+            entity.setAttribute('mindar-image-target', `targetIndex: ${i}`);
             
-            // 2. 쿠폰 이미지가 나타남 (a-entity 내부의 a-image) - A-Frame이 알아서 해줌
+            const image = document.createElement('a-image');
+            image.setAttribute('src', '#couponImg');
+            image.setAttribute('position', '0 0 0.1');
+            image.setAttribute('height', '0.6');
+            image.setAttribute('width', '0.9');
+            
+            entity.appendChild(image);
+            
+            // 타겟 발견 이벤트 리스너 등록
+            entity.addEventListener("targetFound", () => {
+                const couponNum = i + 1; // 1번부터 시작하도록 설정
+                ui.innerText = `🎉 ${couponNum}번 쿠폰 발견! 🎉`;
+                ui.classList.add("found");
+                
+                // 1.5초 뒤 이동 (번호를 파라미터로 전달)
+                setTimeout(() => {
+                    window.location.href = `${TARGET_URL}?num=${couponNum}`;
+                }, 1500);
+            });
 
-            // 3. 1.5초(1500ms) 대기 후 사이트 이동
-            // (쿠폰 이미지를 충분히 보여주기 위해 시간 설정)
-            setTimeout(() => {
-                window.location.href = TARGET_URL;
-            }, 1500); 
-        });
-
-        // 대상을 놓쳤을 때 (선택 사항)
-        targetEl.addEventListener("targetLost", () => {
-            if(!ui.classList.contains("found")) { // 이미 찾았으면 문구 고정
-                ui.innerText = "숨겨진 대상을 비춰보세요";
-                ui.classList.remove("found");
-            }
-        });
+            sceneEl.appendChild(entity);
+        }
     </script>
 </body>
 </html>
